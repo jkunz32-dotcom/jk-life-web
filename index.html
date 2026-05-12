@@ -7,30 +7,32 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        body { background-color: #050505; color: #e5e5e5; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; margin: 0; }
+        body { background-color: #050505; color: #e5e5e5; font-family: 'Inter', sans-serif; margin: 0; }
         .gold-text { background: linear-gradient(to right, #d4af37, #f2d472, #d4af37); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800; letter-spacing: 2px; }
-        /* Die goldene Unterstreichung */
-        .underline-gold { h-1 w-20 bg-gradient-to-r from-transparent via-[#d4af37] to-transparent mx-auto mt-2 opacity-70; }
         .glass-card { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 24px; position: relative; }
-        .nav-item { color: #666; transition: all 0.3s; font-size: 0.75rem; text-decoration: none; display: flex; flex-direction: column; align-items: center; gap: 4px; }
-        .nav-item.active { color: #d4af37; transform: translateY(-2px); }
-        .page { display: none; animation: fadeIn 0.4s ease-out; }
-        .page.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        /* Wichtig: Versteckt Admin-Elemente standardmäßig */
-        .admin-only { display: none !important; }
-        body.is-admin .admin-only { display: block !important; }
+        .nav-item { color: #666; font-size: 0.75rem; text-decoration: none; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .nav-item.active { color: #d4af37; }
+        .page { display: none; }
+        .page.active { display: block; animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* SICHERHEIT: Alles was Admin ist, ist ERST MAL WEG */
+        .admin-content { display: none !important; }
+        body.is-admin .admin-content { display: block !important; }
         body.is-admin .admin-flex { display: flex !important; }
     </style>
 </head>
 <body class="pb-24">
 
+    <div id="loading-overlay" class="fixed inset-0 bg-black z-[100] flex items-center justify-center">
+        <div class="w-10 h-10 border-4 border-[#d4af37] border-t-transparent rounded-full animate-spin"></div>
+    </div>
+
     <header class="pt-10 pb-6 px-6 text-center sticky top-0 bg-[#050505] z-50">
         <div class="flex justify-between items-center max-w-md mx-auto relative">
-            <button onclick="window.saveData()" class="admin-only absolute left-0 bg-[#d4af37]/20 text-[#d4af37] px-4 py-2 rounded-full text-xs font-bold border border-[#d4af37]/30 shadow-[0_0_15px_rgba(212,175,55,0.2)]">CLOUD SPEICHERN</button>
+            <button onclick="window.saveData()" class="admin-content absolute left-0 bg-[#d4af37]/20 text-[#d4af37] px-4 py-2 rounded-full text-xs font-bold border border-[#d4af37]/30">CLOUD SPEICHERN</button>
             <div class="mx-auto">
-                <h1 class="text-3xl gold-text">JK-LIFE</h1>
+                <h1 class="text-3xl gold-text uppercase">JK-LIFE</h1>
                 <div class="h-[2px] w-16 bg-gradient-to-r from-transparent via-[#d4af37] to-transparent mx-auto mt-2"></div>
             </div>
             <button onclick="window.login()" class="absolute right-0 text-gray-500 p-2"><i class="fas fa-cog"></i></button>
@@ -40,12 +42,12 @@
     <main class="max-w-md mx-auto px-6">
         <section id="start" class="page active space-y-6">
             <div id="moments-list" class="space-y-6"></div>
-            <button onclick="addMoment()" class="admin-only w-full py-4 border-2 border-dashed border-gray-800 rounded-2xl text-gray-500 font-medium">+ NEUEN MOMENT</button>
+            <button onclick="addMoment()" class="admin-content w-full py-4 border-2 border-dashed border-gray-800 rounded-2xl text-gray-500">+ MOMENT HINZUFÜGEN</button>
         </section>
 
         <section id="musik" class="page space-y-4">
             <div id="songs-list" class="space-y-3"></div>
-            <button onclick="addSong()" class="admin-only w-full py-4 border-2 border-dashed border-gray-800 rounded-2xl text-gray-500 font-medium">+ NEUEN SONG</button>
+            <button onclick="addSong()" class="admin-content w-full py-4 border-2 border-dashed border-gray-800 rounded-2xl text-gray-500">+ SONG HINZUFÜGEN</button>
         </section>
 
         <section id="kontakt" class="page">
@@ -81,7 +83,6 @@
 
         let songs = [];
         let moments = [];
-        // Hier sind deine Kontakte wieder fest drin
         let contacts = [
             {platform: 'Instagram', name: '@jerome_life'},
             {platform: 'Snapchat', name: 'jerome.jk'},
@@ -95,31 +96,26 @@
             if(el) el.classList.add('active');
         };
 
-        window.renderSongs = () => {
-            const list = document.getElementById('songs-list');
-            list.innerHTML = songs.map((s, i) => `
+        window.renderAll = () => {
+            const isA = document.body.classList.contains('is-admin');
+            
+            document.getElementById('songs-list').innerHTML = songs.map((s, i) => `
                 <div class="glass-card p-4 flex items-center gap-4">
-                    <div class="w-12 h-12 bg-gray-800 rounded-lg flex items-center justify-center"><i class="fas fa-play text-xs text-[#d4af37]"></i></div>
+                    <div class="w-12 h-12 bg-gray-800 rounded-lg flex items-center justify-center text-[#d4af37]"><i class="fas fa-play"></i></div>
                     <div class="flex-1"><div class="font-bold text-sm">${s.title}</div><div class="text-xs text-gray-500">${s.artist}</div></div>
-                    <button onclick="remove('songs', ${i})" class="admin-only text-red-500 p-2">✕</button>
+                    ${isA ? `<button onclick="remove('songs', ${i})" class="text-red-500 p-2">✕</button>` : ''}
                 </div>
             `).join('');
-        };
 
-        window.renderMoments = () => {
-            const list = document.getElementById('moments-list');
-            list.innerHTML = moments.map((m, i) => `
+            document.getElementById('moments-list').innerHTML = moments.map((m, i) => `
                 <div class="glass-card overflow-hidden">
                     <img src="${m.img || 'https://images.unsplash.com/photo-1514525253361-bee8a48740ad?w=800'}" class="w-full h-64 object-cover opacity-80">
-                    <div class="p-4"><div class="text-xs text-[#d4af37] font-bold mb-1 italic">${m.date}</div><div class="text-sm text-gray-300">${m.text}</div></div>
-                    <button onclick="remove('moments', ${i})" class="admin-only absolute top-2 right-2 bg-black/50 p-2 rounded-full">✕</button>
+                    <div class="p-4"><div class="text-xs text-[#d4af37] font-bold italic">${m.date}</div><div class="text-sm text-gray-300">${m.text}</div></div>
+                    ${isA ? `<button onclick="remove('moments', ${i})" class="absolute top-2 right-2 bg-black/50 p-2 rounded-full">✕</button>` : ''}
                 </div>
             `).join('');
-        };
 
-        window.renderContacts = () => {
-            const list = document.getElementById('contacts-list');
-            list.innerHTML = contacts.map(c => `
+            document.getElementById('contacts-list').innerHTML = contacts.map(c => `
                 <div class="glass-card p-5 flex justify-between items-center">
                     <span class="text-sm font-medium">${c.platform}: <span class="text-gray-400 ml-2">${c.name}</span></span>
                     <i class="fas fa-chevron-right text-[10px] text-gray-700"></i>
@@ -128,45 +124,44 @@
         };
 
         window.login = async () => {
-            const code = prompt("Admin-Code:");
+            const code = prompt("Admin-Code eingeben:");
             if(code) {
-                try { await signInWithEmailAndPassword(auth, "admin@jerome.de", code); }
-                catch(e) { alert("Code falsch!"); }
+                try { 
+                    await signInWithEmailAndPassword(auth, "admin@jerome.de", code); 
+                    alert("Willkommen zurück, Jerome! 👑");
+                } catch(e) { 
+                    alert("Falscher Code! Details: " + e.message); 
+                }
             }
         };
 
         window.addSong = () => {
-            const title = prompt("Titel:");
+            const title = prompt("Song Titel:");
             const artist = prompt("Interpret:");
-            if(title && artist) { songs.push({title, artist}); renderSongs(); }
+            if(title && artist) { songs.push({title, artist}); renderAll(); }
         };
 
         window.addMoment = () => {
-            const text = prompt("Was ist neu?");
-            if(text) { moments.push({text, date: new Date().toLocaleDateString('de-DE'), img: ''}); renderMoments(); }
+            const text = prompt("Was ist passiert?");
+            if(text) { moments.push({text, date: new Date().toLocaleDateString('de-DE'), img: ''}); renderAll(); }
         };
 
         window.remove = (type, i) => {
             if(type === 'songs') songs.splice(i, 1); else moments.splice(i, 1);
-            renderSongs(); renderMoments();
+            renderAll();
         };
 
         window.saveData = async () => {
-            if(!auth.currentUser) return alert("Logge dich erst ein!");
             try {
                 await setDoc(doc(db, "content", "jk_pro_data"), { songs, moments, contacts });
-                alert("Alles erfolgreich gespeichert! ✅");
-            } catch (e) { alert("Fehler beim Speichern!"); }
+                alert("Cloud-Update erfolgreich! ✅");
+            } catch (e) { alert("Fehler: " + e.message); }
         };
 
         onAuthStateChanged(auth, (user) => {
-            if(user) {
-                document.body.classList.add('is-admin');
-            } else {
-                document.body.classList.remove('is-admin');
-            }
-            // Nach Login/Logout Listen neu zeichnen um Buttons zu zeigen/verstecken
-            renderSongs(); renderMoments();
+            if(user) document.body.classList.add('is-admin');
+            else document.body.classList.remove('is-admin');
+            renderAll();
         });
 
         window.onload = async () => {
@@ -176,10 +171,11 @@
                     const data = docSnap.data();
                     songs = data.songs || [];
                     moments = data.moments || [];
-                    if(data.contacts) contacts = data.contacts;
                 }
-            } catch(e) { console.log("Ladefehler."); }
-            renderSongs(); renderMoments(); renderContacts();
+            } finally {
+                document.getElementById('loading-overlay').style.display = 'none';
+                renderAll();
+            }
         };
     </script>
 </body>
