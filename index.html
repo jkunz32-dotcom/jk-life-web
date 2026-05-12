@@ -2,290 +2,172 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JK-LIFE | Premium</title>
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>JK-LIFE</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        :root { --bg: #000; --gold: #e5c07b; --card: #111; --gray: #888; }
-        body { background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; margin: 0; padding-bottom: 120px; }
-        
-        header { text-align: center; padding: 60px 20px 30px; }
-        .logo { font-size: 2.5rem; font-weight: 900; color: var(--gold); letter-spacing: 8px; margin: 0; text-shadow: 0 0 15px rgba(229,192,123,0.3); }
-        .underline { height: 3px; width: 80px; background: var(--gold); margin: 10px auto; border-radius: 2px; box-shadow: 0 0 10px var(--gold); }
-        
-        /* Admin-Steuerung */
-        #save-btn { 
-            position: fixed; top: 25px; left: 25px; background: var(--gold); border: none; 
-            padding: 12px 20px; border-radius: 10px; font-weight: bold; z-index: 1002; 
-            color: #000; opacity: 0; pointer-events: none; transition: opacity 0.3s;
-            box-shadow: 0 0 20px rgba(229,192,123,0.4);
-        }
-        .admin-gear { position: fixed; top: 25px; right: 25px; color: var(--gray); z-index: 1001; cursor: pointer; }
-
-        .container { width: 92%; max-width: 500px; margin: 0 auto; }
-        .page { display: none; }
+        body { background-color: #050505; color: #e5e5e5; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+        .gold-text { background: linear-gradient(to right, #d4af37, #f2d472, #d4af37); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800; letter-spacing: 2px; }
+        .glass-card { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 24px; }
+        .nav-item { color: #666; transition: all 0.3s; font-size: 0.75rem; }
+        .nav-item.active { color: #d4af37; transform: translateY(-2px); }
+        .page { display: none; animation: fadeIn 0.4s ease-out; }
         .page.active { display: block; }
-
-        /* Gemeinsames Design für Listen & Galerie */
-        .list-item, .gallery-card { background: var(--card); border-radius: 25px; padding: 20px; margin-bottom: 15px; border: 1px solid #222; position: relative; }
-        
-        /* Musik/Kontakt Style */
-        .list-item { display: flex; align-items: center; }
-        .list-img-box { width: 65px; height: 65px; margin-right: 20px; flex-shrink: 0; border-radius: 15px; overflow: hidden; background: #222; position: relative; cursor: pointer; }
-        
-        /* Galerie Style (Waagerechtes Format) */
-        .gallery-img-box { 
-            width: 100%; 
-            aspect-ratio: 16 / 9; /* Erzwingt waagerechtes Format */
-            border-radius: 18px; 
-            overflow: hidden; 
-            background: #222; 
-            position: relative; 
-            cursor: pointer;
-            margin-bottom: 12px;
-        }
-        .main-img { width: 100%; height: 100%; object-fit: cover; }
-        
-        /* Text für Galerie (Klein & Nebeneinander) */
-        .gallery-meta { display: flex; justify-content: space-between; align-items: center; padding: 0 5px; }
-        .gallery-text { font-size: 0.75rem; font-weight: 500; color: #fff; max-width: 65%; }
-        .gallery-date { font-size: 0.65rem; color: var(--gray); text-transform: uppercase; letter-spacing: 0.5px; }
-
-        .edit-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; font-size: 10px; color: var(--gold); font-weight: bold; }
-        .admin-mode .edit-overlay { display: flex; }
-        
-        /* Lösch-X oben rechts */
-        .del-x { position: absolute; top: -8px; right: -8px; background: #ff4444; color: #fff; border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; z-index: 10; box-shadow: 0 2px 8px rgba(0,0,0,0.5); }
-
-        /* Das "+" Feld (Mittig & kleiner) */
-        .add-dashed-btn { 
-            background: none; 
-            border: 2px dashed #333; 
-            color: var(--gold); 
-            width: 70%; 
-            margin: 25px auto; 
-            padding: 12px; 
-            border-radius: 20px; 
-            font-weight: bold; 
-            cursor: pointer; 
-            text-align: center; 
-            display: none; 
-            font-size: 0.85rem;
-        }
-        .admin-mode .add-dashed-btn { display: block; }
-
-        /* Navigation */
-        nav { position: fixed; bottom: 0; width: 100%; background: rgba(0,0,0,0.95); display: flex; justify-content: space-around; padding: 15px 0 35px; border-top: 1px solid #222; backdrop-filter: blur(15px); z-index: 1000; }
-        .nav-item { color: var(--gray); text-decoration: none; font-size: 0.75rem; text-align: center; }
-        .nav-item.active { color: var(--gold); }
-        .nav-item i { display: block; margin-bottom: 4px; width: 24px; margin-left: auto; margin-right: auto; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .admin-only { display: none; }
+        body.is-admin .admin-only { display: block; }
     </style>
 </head>
-<body>
+<body class="pb-24">
 
-    <button id="save-btn" onclick="saveData()">CLOUD SPEICHERN</button>
-    <div class="admin-gear" onclick="login()"><i data-lucide="settings"></i></div>
-
-    <header>
-        <p class="logo">JK-LIFE</p>
-        <div class="underline"></div>
+    <header class="pt-10 pb-6 px-6 text-center sticky top-0 bg-[#050505] z-50">
+        <div class="flex justify-between items-center max-w-md mx-auto relative">
+            <button onclick="window.saveData()" class="admin-only absolute left-0 bg-[#d4af37]/20 text-[#d4af37] px-4 py-2 rounded-full text-xs font-bold border border-[#d4af37]/30 shadow-[0_0_15px_rgba(212,175,55,0.2)]">CLOUD SPEICHERN</button>
+            <h1 class="text-3xl mx-auto gold-text">JK-LIFE</h1>
+            <button onclick="window.login()" class="absolute right-0 text-gray-500 p-2"><i class="fas fa-cog"></i></button>
+        </div>
+        <div class="h-[1px] w-20 bg-gradient-to-right from-transparent via-[#d4af37] to-transparent mx-auto mt-4 opacity-50"></div>
     </header>
 
-    <div class="container">
-        <div id="home" class="page active">
-            <div id="gallery-list"></div>
-            <div class="add-dashed-btn" onclick="addGalleryItem()">+ NEUEN MOMENT HINZUFÜGEN</div>
-        </div>
+    <main class="max-w-md mx-auto px-6">
+        <section id="start" class="page active space-y-6">
+            <div id="moments-list" class="space-y-6"></div>
+            <button onclick="addMoment()" class="admin-only w-full py-4 border-2 border-dashed border-gray-800 rounded-2xl text-gray-500 font-medium">+ NEUEN MOMENT HINZUFÜGEN</button>
+        </section>
 
-        <div id="musik" class="page">
-            <div id="music-list"></div>
-            <div class="add-dashed-btn" onclick="addSong()">+ NEUEN SONG HINZUFÜGEN</div>
-        </div>
+        <section id="musik" class="page space-y-4">
+            <div id="songs-list" class="space-y-3"></div>
+            <button onclick="addSong()" class="admin-only w-full py-4 border-2 border-dashed border-gray-800 rounded-2xl text-gray-500 font-medium">+ NEUEN SONG HINZUFÜGEN</button>
+        </section>
 
-        <div id="kontakt" class="page">
-            <div id="contact-list"></div>
-        </div>
-    </div>
+        <section id="kontakt" class="page">
+            <div id="contacts-list" class="space-y-4 pt-4"></div>
+        </section>
+    </main>
 
-    <nav>
-        <a href="#" class="nav-item active" data-page="home"><i data-lucide="home"></i>Start</a>
-        <a href="#" class="nav-item" data-page="musik"><i data-lucide="music"></i>Musik</a>
-        <a href="#" class="nav-item" data-page="kontakt"><i data-lucide="mail"></i>Kontakt</a>
+    <nav class="fixed bottom-0 left-0 right-0 bg-[#0a0a0a]/90 backdrop-blur-xl border-t border-white/5 px-8 py-4 z-50">
+        <div class="max-w-md mx-auto flex justify-between items-center">
+            <a href="#" onclick="showPage('start')" class="nav-item active flex flex-col items-center gap-1"><i class="fas fa-home text-xl"></i><span>Start</span></a>
+            <a href="#" onclick="showPage('musik')" class="nav-item flex flex-col items-center gap-1"><i class="fas fa-music text-xl"></i><span>Musik</span></a>
+            <a href="#" onclick="showPage('kontakt')" class="nav-item flex flex-col items-center gap-1"><i class="fas fa-envelope text-xl"></i><span>Kontakt</span></a>
+        </div>
     </nav>
 
     <script type="module">
-        lucide.createIcons();
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
+        // FIREBASE KONFIGURATION (Setze hier deine Daten ein!)
         const firebaseConfig = {
-            apiKey: "AIzaSyCeGsLFF1jBoF8Ao8xy7OtcMhu5b4z_zVg",
+            apiKey: "AIzaSy...", 
             authDomain: "jerome-website-da5b3.firebaseapp.com",
             projectId: "jerome-website-da5b3",
-            storageBucket: "jerome-website-da5b3.firebasestorage.app",
+            storageBucket: "jerome-website-da5b3.appspot.com",
             messagingSenderId: "95494190010",
-            appId: "1:95494190010:web:6d6715eb22e0993873a383"
+            appId: "1:95494190010:web:..."
         };
 
         const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
         const db = getFirestore(app);
+        const auth = getAuth(app);
 
-        let data = {
-            gallery: [],
-            songs: [{img: '', name: 'Song Name', artist: 'Artist'}],
-            contacts: [
-                {img:'', label:'INSTAGRAM', value:'@deinname'},
-                {img:'', label:'SNAPCHAT', value:'dein_snap'},
-                {img:'', label:'E-MAIL', value:'kontakt@jk-life.de'},
-                {img:'', label:'TELEFON', value:'0176...'}
-            ]
+        let songs = [];
+        let moments = [];
+        let contacts = [{name: 'Jerome', platform: 'Instagram', link: '#'}];
+
+        // NAVIGATION
+        window.showPage = (id) => {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            event.currentTarget.classList.add('active');
         };
 
-        async function load() {
-            try {
-                const snap = await getDoc(doc(db, "content", "jk_production_v2"));
-                if (snap.exists()) data = snap.data();
-                render();
-            } catch(e) { render(); }
-        }
-
-        window.render = function() {
-            const isAdmin = auth.currentUser != null;
-            if(isAdmin) {
-                document.body.classList.add('admin-mode');
-                document.getElementById('save-btn').style.opacity = "1";
-                document.getElementById('save-btn').style.pointerEvents = "auto";
-            } else {
-                document.body.classList.remove('admin-mode');
-                document.getElementById('save-btn').style.opacity = "0";
-                document.getElementById('save-btn').style.pointerEvents = "none";
-            }
-
-            // STARTSEITE / GALERIE
-            document.getElementById('gallery-list').innerHTML = data.gallery.map((item, i) => `
-                <div class="gallery-card">
-                    ${isAdmin ? `<button class="del-x" onclick="removeGallery(${i})">X</button>` : ''}
-                    <div class="gallery-img-box" onclick="changeImg('gallery', ${i})">
-                        ${item.url.includes('.mp4') ? `<video src="${item.url}" class="main-img" autoplay muted loop></video>` : `<img src="${item.url || 'https://via.placeholder.com/600x337?text=Moment+wählen'}" class="main-img">`}
-                        <div class="edit-overlay">BILD EDITIEREN</div>
-                    </div>
-                    <div class="gallery-meta">
-                        <div class="gallery-text" contenteditable="${isAdmin}" oninput="data.gallery[${i}].text=this.innerText">${item.text || 'Bildunterschrift...'}</div>
-                        <div class="gallery-date" contenteditable="${isAdmin}" oninput="data.gallery[${i}].date=this.innerText">${item.date || 'MAI 2026'}</div>
-                    </div>
+        // RENDER FUNKTIONEN
+        window.renderSongs = () => {
+            const list = document.getElementById('songs-list');
+            list.innerHTML = songs.map((s, i) => `
+                <div class="glass-card p-4 flex items-center gap-4 relative">
+                    <div class="w-12 h-12 bg-gray-800 rounded-lg flex items-center justify-center"><i class="fas fa-play text-xs text-[#d4af37]"></i></div>
+                    <div><div class="font-bold text-sm">${s.title}</div><div class="text-xs text-gray-500">${s.artist}</div></div>
+                    <button onclick="remove('songs', ${i})" class="admin-only absolute -top-1 -right-1 w-6 h-6 bg-red-500/80 rounded-full text-[10px]">✕</button>
                 </div>
             `).join('');
-
-            // MUSIK
-            document.getElementById('music-list').innerHTML = data.songs.map((s, i) => `
-                <div class="list-item">
-                    ${isAdmin ? `<button class="del-x" onclick="removeSong(${i})">X</button>` : ''}
-                    <div class="list-img-box" onclick="changeImg('songs', ${i})">
-                        <img src="${s.img || 'https://via.placeholder.com/100?text=?'}" class="list-img">
-                        <div class="edit-overlay">EDIT</div>
-                    </div>
-                    <div style="flex:1">
-                        <div style="font-weight:bold; font-size:1.1rem;" contenteditable="${isAdmin}" oninput="data.songs[${i}].name=this.innerText">${s.name}</div>
-                        <div style="color:var(--gray); font-size:0.9rem;" contenteditable="${isAdmin}" oninput="data.songs[${i}].artist=this.innerText">${s.artist}</div>
-                    </div>
-                </div>
-            `).join('');
-
-            // KONTAKT
-            document.getElementById('contact-list').innerHTML = data.contacts.map((c, i) => `
-                <div class="list-item">
-                    <div class="list-img-box" onclick="changeImg('contacts', ${i})">
-                        <img src="${c.img || 'https://via.placeholder.com/100?text=?'}" class="list-img">
-                        <div class="edit-overlay">EDIT</div>
-                    </div>
-                    <div style="flex:1">
-                        <div style="color:var(--gold); font-size:0.75rem; letter-spacing:1px; margin-bottom:5px; font-weight:bold;">${c.label}</div>
-                        <div contenteditable="${isAdmin}" oninput="data.contacts[${i}].value=this.innerText" style="font-size:1.05rem;">${c.value}</div>
-                    </div>
-                </div>
-            `).join('');
-            lucide.createIcons();
-        }
-
-        // LÖSCH-FUNKTIONEN
-        window.removeSong = (i) => { data.songs.splice(i,1); render(); };
-        window.removeGallery = (i) => { data.gallery.splice(i,1); render(); };
-
-        // ADD-FUNKTIONEN
-        window.addSong = () => { data.songs.push({img:'', name:'Song Name', artist:'Artist'}); render(); };
-        window.addGalleryItem = () => { 
-            data.gallery.unshift({url:'', text:'Bildunterschrift', date:'MAI 2026'}); 
-            render(); 
-        };
-        
-        window.changeImg = (type, i) => {
-            if(!auth.currentUser) return;
-            const url = prompt("Bild-URL einfügen:", data[type][i].url || data[type][i].img);
-            if(url !== null) { 
-                if(type === 'gallery') data.gallery[i].url = url;
-                else data[type][i].img = url;
-                render(); 
-            }
         };
 
+        window.renderMoments = () => {
+            const list = document.getElementById('moments-list');
+            list.innerHTML = moments.map((m, i) => `
+                <div class="glass-card overflow-hidden relative">
+                    <img src="${m.img}" class="w-full h-64 object-cover opacity-80" onerror="this.src='https://images.unsplash.com/photo-1514525253361-bee8a48740ad?w=800'">
+                    <div class="p-4"><div class="text-xs text-[#d4af37] font-bold mb-1 italic">${m.date}</div><div class="text-sm text-gray-300 leading-relaxed font-light">${m.text}</div></div>
+                    <button onclick="remove('moments', ${i})" class="admin-only absolute top-2 right-2 w-8 h-8 bg-black/50 backdrop-blur rounded-full">✕</button>
+                </div>
+            `).join('');
+        };
+
+        window.renderContacts = () => {
+            const list = document.getElementById('contacts-list');
+            list.innerHTML = contacts.map((c, i) => `
+                <div class="glass-card p-5 flex justify-between items-center">
+                    <span class="text-sm font-medium tracking-wide">${c.platform}: <span class="text-gray-400 ml-2">${c.name}</span></span>
+                    <i class="fas fa-chevron-right text-[10px] text-gray-700"></i>
+                </div>
+            `).join('');
+        };
+
+        // ADMIN FUNKTIONEN
         window.login = async () => {
             const code = prompt("Admin-Code:");
             if(code) {
-                try { await signInWithEmailAndPassword(auth, "admin@jk-life.de", code); }
+                try { await signInWithEmailAndPassword(auth, "admin@jerome.de", code); }
                 catch(e) { alert("Code falsch!"); }
             }
         };
 
-       window.saveData = async () => {
-    if (!auth.currentUser) {
-        alert("Bitte erst über das Zahnrad einloggen!");
-        return;
-    }
-    try {
-        const dataToSave = { songs, moments, contacts };
-        await setDoc(doc(db, "content", "jk_pro_data"), dataToSave);
-        alert("Alles erfolgreich gespeichert! ✅");
-    } catch (e) {
-        console.error("Firebase Fehler:", e);
-        alert("Fehler: " + e.message); // Das sagt uns genau, WAS nicht passt
-    }
-};
+        window.addSong = () => {
+            const title = prompt("Song Name:");
+            const artist = prompt("Künstler:");
+            if(title && artist) { songs.push({title, artist}); renderSongs(); }
+        };
 
+        window.addMoment = () => {
+            const text = prompt("Was ist passiert?");
+            const date = new Date().toLocaleDateString('de-DE');
+            if(text) { moments.push({text, date, img: ''}); renderMoments(); }
+        };
 
-};
+        window.remove = (type, i) => {
+            if(type === 'songs') songs.splice(i, 1); else moments.splice(i, 1);
+            renderSongs(); renderMoments();
+        };
 
-// Diese Funktion lädt die Daten automatisch beim Start der Seite
-window.onload = async () => {
-    try {
-        const docSnap = await getDoc(doc(db, "content", "jk_pro_data"));
-        if (docSnap.exists()) {
-            const cloudData = docSnap.data();
-            songs = cloudData.songs || [];
-            moments = cloudData.moments || [];
-            contacts = cloudData.contacts || [];
-        }
-    } catch (e) {
-        console.error("Ladefehler:", e);
-    }
-    renderSongs();
-    renderMoments();
-    renderContacts();
-};
+        // CLOUD SPEICHERN & LADEN
+        window.saveData = async () => {
+            if(!auth.currentUser) return alert("Logge dich erst über das Zahnrad ein!");
+            try {
+                await setDoc(doc(db, "content", "jk_pro_data"), { songs, moments, contacts });
+                alert("Alles erfolgreich gespeichert! ✅");
+            } catch (e) { alert("Speicherfehler!"); }
+        };
 
+        onAuthStateChanged(auth, (user) => {
+            if(user) document.body.classList.add('is-admin');
+            else document.body.classList.remove('is-admin');
+        });
 
-        onAuthStateChanged(auth, u => { render(); });
-
-        document.querySelectorAll('.nav-item').forEach(n => n.addEventListener('click', e => {
-            e.preventDefault();
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-            document.getElementById(n.dataset.page).classList.add('active');
-            n.classList.add('active');
-        }));
-
-        load();
+        window.onload = async () => {
+            const docSnap = await getDoc(doc(db, "content", "jk_pro_data"));
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                songs = data.songs || [];
+                moments = data.moments || [];
+                contacts = data.contacts || [];
+            }
+            renderSongs(); renderMoments(); renderContacts();
+        };
     </script>
 </body>
 </html>
