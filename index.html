@@ -7,10 +7,10 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        body { background-color: #050505; color: #e5e5e5; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background-color: #050505; color: #e5e5e5; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; margin: 0; }
         .gold-text { background: linear-gradient(to right, #d4af37, #f2d472, #d4af37); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800; letter-spacing: 2px; }
-        .glass-card { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 24px; }
-        .nav-item { color: #666; transition: all 0.3s; font-size: 0.75rem; }
+        .glass-card { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 24px; position: relative; }
+        .nav-item { color: #666; transition: all 0.3s; font-size: 0.75rem; text-decoration: none; display: flex; flex-direction: column; align-items: center; gap: 4px; }
         .nav-item.active { color: #d4af37; transform: translateY(-2px); }
         .page { display: none; animation: fadeIn 0.4s ease-out; }
         .page.active { display: block; }
@@ -27,18 +27,17 @@
             <h1 class="text-3xl mx-auto gold-text">JK-LIFE</h1>
             <button onclick="window.login()" class="absolute right-0 text-gray-500 p-2"><i class="fas fa-cog"></i></button>
         </div>
-        <div class="h-[1px] w-20 bg-gradient-to-right from-transparent via-[#d4af37] to-transparent mx-auto mt-4 opacity-50"></div>
     </header>
 
     <main class="max-w-md mx-auto px-6">
         <section id="start" class="page active space-y-6">
             <div id="moments-list" class="space-y-6"></div>
-            <button onclick="addMoment()" class="admin-only w-full py-4 border-2 border-dashed border-gray-800 rounded-2xl text-gray-500 font-medium">+ NEUEN MOMENT HINZUFÜGEN</button>
+            <button onclick="addMoment()" class="admin-only w-full py-4 border-2 border-dashed border-gray-800 rounded-2xl text-gray-500 font-medium">+ NEUEN MOMENT</button>
         </section>
 
         <section id="musik" class="page space-y-4">
             <div id="songs-list" class="space-y-3"></div>
-            <button onclick="addSong()" class="admin-only w-full py-4 border-2 border-dashed border-gray-800 rounded-2xl text-gray-500 font-medium">+ NEUEN SONG HINZUFÜGEN</button>
+            <button onclick="addSong()" class="admin-only w-full py-4 border-2 border-dashed border-gray-800 rounded-2xl text-gray-500 font-medium">+ NEUEN SONG</button>
         </section>
 
         <section id="kontakt" class="page">
@@ -48,9 +47,9 @@
 
     <nav class="fixed bottom-0 left-0 right-0 bg-[#0a0a0a]/90 backdrop-blur-xl border-t border-white/5 px-8 py-4 z-50">
         <div class="max-w-md mx-auto flex justify-between items-center">
-            <a href="#" onclick="showPage('start')" class="nav-item active flex flex-col items-center gap-1"><i class="fas fa-home text-xl"></i><span>Start</span></a>
-            <a href="#" onclick="showPage('musik')" class="nav-item flex flex-col items-center gap-1"><i class="fas fa-music text-xl"></i><span>Musik</span></a>
-            <a href="#" onclick="showPage('kontakt')" class="nav-item flex flex-col items-center gap-1"><i class="fas fa-envelope text-xl"></i><span>Kontakt</span></a>
+            <a href="javascript:void(0)" onclick="showPage('start', this)" class="nav-item active"><i class="fas fa-home text-xl"></i><span>Start</span></a>
+            <a href="javascript:void(0)" onclick="showPage('musik', this)" class="nav-item"><i class="fas fa-music text-xl"></i><span>Musik</span></a>
+            <a href="javascript:void(0)" onclick="showPage('kontakt', this)" class="nav-item"><i class="fas fa-envelope text-xl"></i><span>Kontakt</span></a>
         </div>
     </nav>
 
@@ -59,14 +58,13 @@
         import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-        // FIREBASE KONFIGURATION (Setze hier deine Daten ein!)
         const firebaseConfig = {
-            apiKey: "AIzaSy...", 
+            apiKey: "AIzaSyCeGsLFF1jBoF8Ao8xy7OtcMhu5b4z_zVg",
             authDomain: "jerome-website-da5b3.firebaseapp.com",
             projectId: "jerome-website-da5b3",
-            storageBucket: "jerome-website-da5b3.appspot.com",
+            storageBucket: "jerome-website-da5b3.firebasestorage.app",
             messagingSenderId: "95494190010",
-            appId: "1:95494190010:web:..."
+            appId: "1:95494190010:web:6d6715eb22e0993873a383"
         };
 
         const app = initializeApp(firebaseConfig);
@@ -75,24 +73,26 @@
 
         let songs = [];
         let moments = [];
-        let contacts = [{name: 'Jerome', platform: 'Instagram', link: '#'}];
+        let contacts = [{platform: 'Instagram', name: 'jerome_life'}];
 
-        // NAVIGATION
-        window.showPage = (id) => {
+        window.showPage = (id, el) => {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             document.getElementById(id).classList.add('active');
-            event.currentTarget.classList.add('active');
+            if(el) el.classList.add('active');
         };
 
-        // RENDER FUNKTIONEN
+        window.renderAll = () => {
+            renderSongs(); renderMoments(); renderContacts();
+        };
+
         window.renderSongs = () => {
             const list = document.getElementById('songs-list');
             list.innerHTML = songs.map((s, i) => `
-                <div class="glass-card p-4 flex items-center gap-4 relative">
+                <div class="glass-card p-4 flex items-center gap-4">
                     <div class="w-12 h-12 bg-gray-800 rounded-lg flex items-center justify-center"><i class="fas fa-play text-xs text-[#d4af37]"></i></div>
-                    <div><div class="font-bold text-sm">${s.title}</div><div class="text-xs text-gray-500">${s.artist}</div></div>
-                    <button onclick="remove('songs', ${i})" class="admin-only absolute -top-1 -right-1 w-6 h-6 bg-red-500/80 rounded-full text-[10px]">✕</button>
+                    <div class="flex-1"><div class="font-bold text-sm">${s.title}</div><div class="text-xs text-gray-500">${s.artist}</div></div>
+                    <button onclick="remove('songs', ${i})" class="admin-only text-red-500 p-2">✕</button>
                 </div>
             `).join('');
         };
@@ -100,25 +100,24 @@
         window.renderMoments = () => {
             const list = document.getElementById('moments-list');
             list.innerHTML = moments.map((m, i) => `
-                <div class="glass-card overflow-hidden relative">
-                    <img src="${m.img}" class="w-full h-64 object-cover opacity-80" onerror="this.src='https://images.unsplash.com/photo-1514525253361-bee8a48740ad?w=800'">
-                    <div class="p-4"><div class="text-xs text-[#d4af37] font-bold mb-1 italic">${m.date}</div><div class="text-sm text-gray-300 leading-relaxed font-light">${m.text}</div></div>
-                    <button onclick="remove('moments', ${i})" class="admin-only absolute top-2 right-2 w-8 h-8 bg-black/50 backdrop-blur rounded-full">✕</button>
+                <div class="glass-card overflow-hidden">
+                    <img src="${m.img || 'https://images.unsplash.com/photo-1514525253361-bee8a48740ad?w=800'}" class="w-full h-64 object-cover opacity-80">
+                    <div class="p-4"><div class="text-xs text-[#d4af37] font-bold mb-1 italic">${m.date}</div><div class="text-sm text-gray-300">${m.text}</div></div>
+                    <button onclick="remove('moments', ${i})" class="admin-only absolute top-2 right-2 bg-black/50 p-2 rounded-full">✕</button>
                 </div>
             `).join('');
         };
 
         window.renderContacts = () => {
             const list = document.getElementById('contacts-list');
-            list.innerHTML = contacts.map((c, i) => `
+            list.innerHTML = contacts.map(c => `
                 <div class="glass-card p-5 flex justify-between items-center">
-                    <span class="text-sm font-medium tracking-wide">${c.platform}: <span class="text-gray-400 ml-2">${c.name}</span></span>
+                    <span class="text-sm font-medium">${c.platform}: <span class="text-gray-400 ml-2">${c.name}</span></span>
                     <i class="fas fa-chevron-right text-[10px] text-gray-700"></i>
                 </div>
             `).join('');
         };
 
-        // ADMIN FUNKTIONEN
         window.login = async () => {
             const code = prompt("Admin-Code:");
             if(code) {
@@ -128,29 +127,27 @@
         };
 
         window.addSong = () => {
-            const title = prompt("Song Name:");
-            const artist = prompt("Künstler:");
+            const title = prompt("Titel:");
+            const artist = prompt("Interpret:");
             if(title && artist) { songs.push({title, artist}); renderSongs(); }
         };
 
         window.addMoment = () => {
-            const text = prompt("Was ist passiert?");
-            const date = new Date().toLocaleDateString('de-DE');
-            if(text) { moments.push({text, date, img: ''}); renderMoments(); }
+            const text = prompt("Was ist neu?");
+            if(text) { moments.push({text, date: new Date().toLocaleDateString('de-DE'), img: ''}); renderMoments(); }
         };
 
         window.remove = (type, i) => {
             if(type === 'songs') songs.splice(i, 1); else moments.splice(i, 1);
-            renderSongs(); renderMoments();
+            renderAll();
         };
 
-        // CLOUD SPEICHERN & LADEN
         window.saveData = async () => {
-            if(!auth.currentUser) return alert("Logge dich erst über das Zahnrad ein!");
+            if(!auth.currentUser) return alert("Bitte erst über das Zahnrad einloggen!");
             try {
                 await setDoc(doc(db, "content", "jk_pro_data"), { songs, moments, contacts });
                 alert("Alles erfolgreich gespeichert! ✅");
-            } catch (e) { alert("Speicherfehler!"); }
+            } catch (e) { alert("Fehler beim Speichern!"); }
         };
 
         onAuthStateChanged(auth, (user) => {
@@ -159,15 +156,18 @@
         });
 
         window.onload = async () => {
-            const docSnap = await getDoc(doc(db, "content", "jk_pro_data"));
-            if (docSnap.exists()) {
-                const data = docSnap.data();
-                songs = data.songs || [];
-                moments = data.moments || [];
-                contacts = data.contacts || [];
-            }
-            renderSongs(); renderMoments(); renderContacts();
+            try {
+                const docSnap = await getDoc(doc(db, "content", "jk_pro_data"));
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    songs = data.songs || [];
+                    moments = data.moments || [];
+                    contacts = data.contacts || contacts;
+                }
+            } catch(e) { console.log("Ladefehler oder noch keine Daten."); }
+            renderAll();
         };
     </script>
 </body>
 </html>
+
