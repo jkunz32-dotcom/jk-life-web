@@ -238,12 +238,35 @@
             }
         };
 
-        window.saveData = async () => {
-            try {
-                await setDoc(doc(db, "content", "jk_production_v2"), data);
-                alert("Alles erfolgreich gespeichert! ✅");
-            } catch(e) { alert("Fehler!"); }
-        };
+       window.saveData = async () => {
+    try {
+        const dataToSave = { songs, moments, contacts };
+        await setDoc(doc(db, "content", "jk_pro_data"), dataToSave);
+        alert("Alles erfolgreich gespeichert! ✅");
+    } catch (e) {
+        console.error(e);
+        alert("Fehler beim Speichern!");
+    }
+};
+
+// Diese Funktion lädt die Daten automatisch beim Start der Seite
+window.onload = async () => {
+    try {
+        const docSnap = await getDoc(doc(db, "content", "jk_pro_data"));
+        if (docSnap.exists()) {
+            const cloudData = docSnap.data();
+            songs = cloudData.songs || [];
+            moments = cloudData.moments || [];
+            contacts = cloudData.contacts || [];
+        }
+    } catch (e) {
+        console.error("Ladefehler:", e);
+    }
+    renderSongs();
+    renderMoments();
+    renderContacts();
+};
+
 
         onAuthStateChanged(auth, u => { render(); });
 
