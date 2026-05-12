@@ -10,16 +10,15 @@
         body { background-color: #050505; color: #e5e5e5; font-family: 'Inter', sans-serif; margin: 0; }
         .gold-text { background: linear-gradient(to right, #d4af37, #f2d472, #d4af37); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800; letter-spacing: 2px; }
         .glass-card { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 24px; position: relative; }
-        .nav-item { color: #666; font-size: 0.75rem; text-decoration: none; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .nav-item { color: #666; font-size: 0.75rem; display: flex; flex-direction: column; align-items: center; gap: 4px; text-decoration: none; }
         .nav-item.active { color: #d4af37; }
         .page { display: none; }
         .page.active { display: block; animation: fadeIn 0.4s ease-out; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        /* SICHERHEIT: Alles was Admin ist, ist ERST MAL WEG */
-        .admin-content { display: none !important; }
-        body.is-admin .admin-content { display: block !important; }
-        body.is-admin .admin-flex { display: flex !important; }
+        
+        /* Die Rettung: Admin-Sachen sind ABSOLUT unsichtbar ohne Login */
+        .admin-only { display: none !important; }
+        body.is-admin .admin-only { display: block !important; }
     </style>
 </head>
 <body class="pb-24">
@@ -30,7 +29,7 @@
 
     <header class="pt-10 pb-6 px-6 text-center sticky top-0 bg-[#050505] z-50">
         <div class="flex justify-between items-center max-w-md mx-auto relative">
-            <button onclick="window.saveData()" class="admin-content absolute left-0 bg-[#d4af37]/20 text-[#d4af37] px-4 py-2 rounded-full text-xs font-bold border border-[#d4af37]/30">CLOUD SPEICHERN</button>
+            <button onclick="window.saveData()" class="admin-only absolute left-0 bg-[#d4af37]/20 text-[#d4af37] px-4 py-2 rounded-full text-xs font-bold border border-[#d4af37]/30 shadow-lg">CLOUD SPEICHERN</button>
             <div class="mx-auto">
                 <h1 class="text-3xl gold-text uppercase">JK-LIFE</h1>
                 <div class="h-[2px] w-16 bg-gradient-to-r from-transparent via-[#d4af37] to-transparent mx-auto mt-2"></div>
@@ -42,12 +41,12 @@
     <main class="max-w-md mx-auto px-6">
         <section id="start" class="page active space-y-6">
             <div id="moments-list" class="space-y-6"></div>
-            <button onclick="addMoment()" class="admin-content w-full py-4 border-2 border-dashed border-gray-800 rounded-2xl text-gray-500">+ MOMENT HINZUFÜGEN</button>
+            <button onclick="addMoment()" class="admin-only w-full py-4 border-2 border-dashed border-gray-800 rounded-2xl text-gray-500">+ MOMENT</button>
         </section>
 
         <section id="musik" class="page space-y-4">
             <div id="songs-list" class="space-y-3"></div>
-            <button onclick="addSong()" class="admin-content w-full py-4 border-2 border-dashed border-gray-800 rounded-2xl text-gray-500">+ SONG HINZUFÜGEN</button>
+            <button onclick="addSong()" class="admin-only w-full py-4 border-2 border-dashed border-gray-800 rounded-2xl text-gray-500">+ SONG</button>
         </section>
 
         <section id="kontakt" class="page">
@@ -83,10 +82,12 @@
 
         let songs = [];
         let moments = [];
+        // DEINE KONTAKTE (Hier kannst du Email/Nummer anpassen)
         let contacts = [
-            {platform: 'Instagram', name: '@jerome_life'},
-            {platform: 'Snapchat', name: 'jerome.jk'},
-            {platform: 'TikTok', name: 'jerome_life'}
+            {p: 'Instagram', n: '@jerome_life', i: 'fa-instagram'},
+            {p: 'Snapchat', n: 'jerome.jk', i: 'fa-snapchat'},
+            {p: 'E-Mail', n: 'dein-name@gmail.com', i: 'fa-envelope'},
+            {p: 'Mobil', n: '+49 176 ...', i: 'fa-phone'}
         ];
 
         window.showPage = (id, el) => {
@@ -97,52 +98,49 @@
         };
 
         window.renderAll = () => {
-            const isA = document.body.classList.contains('is-admin');
+            const isAdmin = document.body.classList.contains('is-admin');
             
             document.getElementById('songs-list').innerHTML = songs.map((s, i) => `
                 <div class="glass-card p-4 flex items-center gap-4">
-                    <div class="w-12 h-12 bg-gray-800 rounded-lg flex items-center justify-center text-[#d4af37]"><i class="fas fa-play"></i></div>
+                    <div class="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center text-[#d4af37]"><i class="fas fa-play text-xs"></i></div>
                     <div class="flex-1"><div class="font-bold text-sm">${s.title}</div><div class="text-xs text-gray-500">${s.artist}</div></div>
-                    ${isA ? `<button onclick="remove('songs', ${i})" class="text-red-500 p-2">✕</button>` : ''}
+                    ${isAdmin ? `<button onclick="remove('songs', ${i})" class="text-red-500 p-2">✕</button>` : ''}
                 </div>
             `).join('');
 
             document.getElementById('moments-list').innerHTML = moments.map((m, i) => `
                 <div class="glass-card overflow-hidden">
-                    <img src="${m.img || 'https://images.unsplash.com/photo-1514525253361-bee8a48740ad?w=800'}" class="w-full h-64 object-cover opacity-80">
-                    <div class="p-4"><div class="text-xs text-[#d4af37] font-bold italic">${m.date}</div><div class="text-sm text-gray-300">${m.text}</div></div>
-                    ${isA ? `<button onclick="remove('moments', ${i})" class="absolute top-2 right-2 bg-black/50 p-2 rounded-full">✕</button>` : ''}
+                    <img src="${m.img || 'https://images.unsplash.com/photo-1514525253361-bee8a48740ad?w=800'}" class="w-full h-64 object-cover opacity-70">
+                    <div class="p-4"><div class="text-xs text-[#d4af37] font-bold italic mb-1">${m.date}</div><div class="text-sm text-gray-300 leading-relaxed">${m.text}</div></div>
+                    ${isAdmin ? `<button onclick="remove('moments', ${i})" class="absolute top-2 right-2 bg-black/60 w-8 h-8 rounded-full flex items-center justify-center">✕</button>` : ''}
                 </div>
             `).join('');
 
             document.getElementById('contacts-list').innerHTML = contacts.map(c => `
                 <div class="glass-card p-5 flex justify-between items-center">
-                    <span class="text-sm font-medium">${c.platform}: <span class="text-gray-400 ml-2">${c.name}</span></span>
+                    <span class="text-sm"><i class="fab ${c.i} mr-3 text-[#d4af37]"></i>${c.p}: <span class="text-gray-400 ml-2">${c.n}</span></span>
                     <i class="fas fa-chevron-right text-[10px] text-gray-700"></i>
                 </div>
             `).join('');
         };
 
         window.login = async () => {
-            const code = prompt("Admin-Code eingeben:");
+            const code = prompt("Admin-Passwort:");
             if(code) {
                 try { 
                     await signInWithEmailAndPassword(auth, "admin@jerome.de", code); 
-                    alert("Willkommen zurück, Jerome! 👑");
-                } catch(e) { 
-                    alert("Falscher Code! Details: " + e.message); 
-                }
+                } catch(e) { alert("Code ungültig! Prüfe Firebase Authentication."); }
             }
         };
 
         window.addSong = () => {
-            const title = prompt("Song Titel:");
-            const artist = prompt("Interpret:");
+            const title = prompt("Titel:");
+            const artist = prompt("Künstler:");
             if(title && artist) { songs.push({title, artist}); renderAll(); }
         };
 
         window.addMoment = () => {
-            const text = prompt("Was ist passiert?");
+            const text = prompt("Was gibt's Neues?");
             if(text) { moments.push({text, date: new Date().toLocaleDateString('de-DE'), img: ''}); renderAll(); }
         };
 
@@ -153,8 +151,8 @@
 
         window.saveData = async () => {
             try {
-                await setDoc(doc(db, "content", "jk_pro_data"), { songs, moments, contacts });
-                alert("Cloud-Update erfolgreich! ✅");
+                await setDoc(doc(db, "content", "jk_pro_data"), { songs, moments });
+                alert("Erfolgreich gespeichert! ✅");
             } catch (e) { alert("Fehler: " + e.message); }
         };
 
