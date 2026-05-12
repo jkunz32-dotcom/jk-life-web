@@ -239,14 +239,21 @@
         };
 
        window.saveData = async () => {
+    if (!auth.currentUser) {
+        alert("Bitte erst über das Zahnrad einloggen!");
+        return;
+    }
     try {
         const dataToSave = { songs, moments, contacts };
         await setDoc(doc(db, "content", "jk_pro_data"), dataToSave);
         alert("Alles erfolgreich gespeichert! ✅");
     } catch (e) {
-        console.error(e);
-        alert("Fehler beim Speichern!");
+        console.error("Firebase Fehler:", e);
+        alert("Fehler: " + e.message); // Das sagt uns genau, WAS nicht passt
     }
+};
+
+
 };
 
 // Diese Funktion lädt die Daten automatisch beim Start der Seite
